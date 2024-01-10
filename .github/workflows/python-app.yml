@@ -8,7 +8,7 @@ on:
     branches: [ "master" ]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -34,4 +34,19 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest
+        pytest --alluredir=allure-results
+    - name: Allure Report action from marketplace 
+      uses: simple-elf/allure-report-action@master 
+      if: always() 
+      with: 
+        allure_results: allure-results 
+        allure_history: allure-history 
+        keep_reports: 20 
+
+    - name: Deploy report to Github Pages 
+      if: always() 
+      uses: peaceiris/actions-gh-pages@v2 
+      env: 
+        PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PUBLISH_BRANCH: gh-pages 
+        PUBLISH_DIR: allure-history
